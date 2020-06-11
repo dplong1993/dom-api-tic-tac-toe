@@ -1,10 +1,13 @@
 window.addEventListener("DOMContentLoaded", () => {
+
   // Initialized a game board to track the game state
-  const board = [
+  let board = [
     ['', '', ''],
     ['', '', ''],
     ['', '', '']
   ];
+
+  // localStorage.setItem('game-board', JSON.stringify(board));
 
   // Grabs tic-tac toe board from DOM
   const divBoard = document.getElementById('tic-tac-toe-board');
@@ -15,8 +18,51 @@ window.addEventListener("DOMContentLoaded", () => {
   //Player One is X and corresponds to an even playerCounter value
   //Player Two is O and corresponds to an odd playerCounter value
   let playerCounter = 0;
+  let computerPlayer = ['X', 'O'][Math.round(Math.random())];
+  // console.log(computerPlayer);
+  // localStorage.setItem('player-counter', JSON.stringify(playerCounter));
 
-  const handleClick = event => {
+  // call handleClick callback on click on divboard
+  divBoard.addEventListener('click', handleClick);
+  newGame.addEventListener('click', newGameClick);
+  giveUp.addEventListener('click', giveUpClick);
+
+
+  function executeComputerTurn () {
+    let charPlace = true
+    while(charPlace) {
+      let guess = Math.floor(Math.random() * 9);
+      const square = document.getElementById(`square-${guess}`);
+      if (!square.classList.contains('clicked')) {
+        square.click();
+        charPlace = false;
+      }
+      }
+  }
+
+  if (localStorage.getItem('game-board')) {
+    board = JSON.parse(localStorage.getItem('game-board'));
+    playerCounter = JSON.parse(localStorage.getItem('player-counter'));
+    computerPlayer = JSON.parse(localStorage.getItem('computer-player'));
+
+    board.forEach((row, i) => {
+      row.forEach((ele, j) => {
+        const element = document.getElementById(`square-${(i*3) + j}`);
+        if (ele == 'X') {
+          element.style.backgroundImage = "url('images/player-x.svg')";
+        } else if (ele === 'O') {
+          element.style.backgroundImage = "url('images/player-o.svg')"
+        }
+      });
+    });
+  } else {
+    if (computerPlayer === 'X') {
+      console.log('restart', computerPlayer);
+      executeComputerTurn();
+    }
+  }
+
+function handleClick (event) {
     if (event.target.id !== 'tic-tac-toe-board') {
       if(playerCounter === 0) {
         giveUp.removeAttribute('disabled');
@@ -58,10 +104,17 @@ window.addEventListener("DOMContentLoaded", () => {
           updateGameStatus("");
         }
       }
+      if (gameStatus.innerText === "") {
+        if (computerPlayer === 'X' && playerCounter % 2 === 0) {
+          executeComputerTurn();
+        } else if (computerPlayer === 'O' && playerCounter % 2 === 1) {
+          executeComputerTurn();
+        }
+      }
     }
   };
 
-  const newGameClick = event => {
+  function newGameClick (event) {
     newGame.setAttribute('disabled', 'true');
     gameStatus.innerText = "";
     board.forEach((row, i1) => {
@@ -78,10 +131,23 @@ window.addEventListener("DOMContentLoaded", () => {
 
     playerCounter = 0;
 
+
+    localStorage.setItem('game-board', JSON.stringify(board));
+    localStorage.setItem('player-counter', JSON.stringify(playerCounter));
+
     divBoard.addEventListener('click', handleClick);
+    computerPlayer = ['X', 'O'][Math.round(Math.random())];
+
+    localStorage.setItem('computer-player', JSON.stringify(computerPlayer));
+
+    console.log('newGame', computerPlayer);
+    if (computerPlayer === 'X') {
+      executeComputerTurn();
+    }
+
   }
 
-  const giveUpClick = event => {
+  function giveUpClick (event) {
     if(playerCounter % 2 === 0) {
       updateGameStatus('O');
     } else {
@@ -90,13 +156,8 @@ window.addEventListener("DOMContentLoaded", () => {
     giveUp.setAttribute('disabled', 'true');
   };
 
-  // call handleClick callback on click on divboard
-  divBoard.addEventListener('click', handleClick);
-  newGame.addEventListener('click', newGameClick);
-  giveUp.addEventListener('click', giveUpClick);
-
   // Handles updating h1 element
-  const updateGameStatus = char => {
+  function updateGameStatus (char) {
     newGame.removeAttribute('disabled');
     divBoard.removeEventListener('click', handleClick);
     if (char === '') {
@@ -107,7 +168,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // Handles updating the game board with an X or O
-  const addToBoard = (num, char) => {
+  function addToBoard (num, char) {
     if (num < 3) {
       board[0][num] = char;
     } else if (num < 6) {
@@ -115,10 +176,13 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
       board[2][num - 6] = char;
     }
+
+    localStorage.setItem('game-board', JSON.stringify(board));
+    localStorage.setItem('player-counter', JSON.stringify(playerCounter));
   }
 
   // Checks if the game is won via rows
-  const rowWin = (num) => {
+  function rowWin(num) {
     for (let i = 1; i < 3; i++) {
       if (board[num][i - 1] !== board[num][i] || board[num][i] === '') {
         return false;
@@ -128,7 +192,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // Checks if the game is won via columns
-  const columnWin = (num) => {
+  function columnWin(num) {
     for (let i = 1; i < 3; i++) {
       if (board[i - 1][num] !== board[i][num] || board[i - 1][num] === '') {
         return false;
@@ -138,7 +202,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // Checks if diagonal win
-  const diagWin = (num) => {
+  function diagWin(num) {
     debugger;
     //Checks front diagonal for win
     if ((board[0][num] === board[1][num + 1] && board[1][num + 1] === board[2][num + 2]) && board[0][num] !== '') {
@@ -154,7 +218,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   //Checks the board to see if a win has occurred
-  const checkWin = () => {
+  function checkWin () {
     let win = false;
 
     //Runs through each row and see if the current row has a win
@@ -187,7 +251,7 @@ window.addEventListener("DOMContentLoaded", () => {
   };
 
   //Check to see if the board is full of X and O characters
-  const boardFull = () => {
+  function boardFull() {
     return board.every(row => {
       return row.every(ele => {
         return ele !== '';
