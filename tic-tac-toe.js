@@ -18,6 +18,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const handleClick = event => {
     if (event.target.id !== 'tic-tac-toe-board') {
+      if(playerCounter === 0) {
+        giveUp.removeAttribute('disabled');
+      }
+
       // Grabs element from DOM that event performed on if its not the container div
       const square = document.getElementById(event.target.id);
 
@@ -77,9 +81,19 @@ window.addEventListener("DOMContentLoaded", () => {
     divBoard.addEventListener('click', handleClick);
   }
 
+  const giveUpClick = event => {
+    if(playerCounter % 2 === 0) {
+      updateGameStatus('O');
+    } else {
+      updateGameStatus('X');
+    }
+    giveUp.setAttribute('disabled', 'true');
+  };
+
   // call handleClick callback on click on divboard
   divBoard.addEventListener('click', handleClick);
   newGame.addEventListener('click', newGameClick);
+  giveUp.addEventListener('click', giveUpClick);
 
   // Handles updating h1 element
   const updateGameStatus = char => {
