@@ -8,6 +8,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Grabs tic-tac toe board from DOM
   const divBoard = document.getElementById('tic-tac-toe-board');
+  const newGame = document.getElementById('new-game');
+  const giveUp = document.getElementById('give-up');
+  const gameStatus = document.getElementById('game-status');
 
   //Player One is X and corresponds to an even playerCounter value
   //Player Two is O and corresponds to an odd playerCounter value
@@ -54,14 +57,34 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  const newGameClick = event => {
+    newGame.setAttribute('disabled', 'true');
+    gameStatus.innerText = "";
+    board.forEach((row, i1) => {
+      row.forEach((ele, i2) => {
+        board[i1][i2] = "";
+      });
+    });
+
+    for (let i = 0; i < 9; i++) {
+      let element = document.getElementById(`square-${i}`);
+      element.style.removeProperty('background-image');
+      element.classList.remove('clicked');
+    }
+
+    playerCounter = 0;
+
+    divBoard.addEventListener('click', handleClick);
+  }
+
   // call handleClick callback on click on divboard
   divBoard.addEventListener('click', handleClick);
+  newGame.addEventListener('click', newGameClick);
 
   // Handles updating h1 element
   const updateGameStatus = char => {
+    newGame.removeAttribute('disabled');
     divBoard.removeEventListener('click', handleClick);
-
-    const gameStatus = document.getElementById('game-status');
     if (char === '') {
       gameStatus.innerText = 'Winner: None';
     } else {
@@ -69,7 +92,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Handles updating the game board
+  // Handles updating the game board with an X or O
   const addToBoard = (num, char) => {
     if (num < 3) {
       board[0][num] = char;
@@ -103,14 +126,15 @@ window.addEventListener("DOMContentLoaded", () => {
   // Checks if diagonal win
   const diagWin = (num) => {
     debugger;
+    //Checks front diagonal for win
     if ((board[0][num] === board[1][num + 1] && board[1][num + 1] === board[2][num + 2]) && board[0][num] !== '') {
-      debugger;
       return true;
-    } else if ((board[0][num] === board[1][num - 1] && board[1][num - 1] === board[2][num - 2]) && board[0][num] !== '') {
-      debugger;
+    }
+    //Check back diagonal for win
+    else if ((board[0][num] === board[1][num - 1] && board[1][num - 1] === board[2][num - 2]) && board[0][num] !== '') {
       return true;
     } else {
-      debugger
+      // If not a win from diagonals, return false
       return false;
     }
   }
