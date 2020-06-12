@@ -27,7 +27,6 @@ window.addEventListener("DOMContentLoaded", () => {
   newGame.addEventListener('click', newGameClick);
   giveUp.addEventListener('click', giveUpClick);
 
-
   function executeComputerTurn () {
     let charPlace = true
     while(charPlace) {
